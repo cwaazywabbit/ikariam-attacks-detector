@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ikariam Attacks Detector
 // @namespace    http://ikariam.ninja/
-// @version      0.45
+// @version      0.451
 // @description  try to take over the world!
 // @author       Shadi
 // @match        https://s*-*.ikariam.gameforge.com/*
