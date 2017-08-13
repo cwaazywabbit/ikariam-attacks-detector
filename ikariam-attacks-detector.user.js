@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         Ikariam Attacks Detector
 // @namespace    http://ikariam.ninja/
-// @version      0.451
-// @description  try to take over the world!
+// @version      0.46
 // @author       Shadi
+// @description  try to take over the world!
 // @match        https://s*-*.ikariam.gameforge.com/*
 // @require      https://greasyfork.org/scripts/3622-ikariam-developer-tools-v0-5-0/code/Ikariam Developer Tools V050+.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js
