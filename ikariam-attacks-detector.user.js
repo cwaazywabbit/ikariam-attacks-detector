@@ -10,8 +10,8 @@
 // @require      https://raw.githubusercontent.com/mckamey/countdownjs/master/countdown.min.js
 // @require      https://raw.githubusercontent.com/icambron/moment-countdown/master/dist/moment-countdown.min.js
 // @require      https://raw.githubusercontent.com/kamranahmedse/jquery-toast-plugin/master/dist/jquery.toast.min.js
-// @updateUrl    https://raw.githubusercontent.com/cwaazywabbit/ikariam-attacks-detector/master/dist/ikaraim-attacks-detector.user.js
-// @downloadUrl  https://raw.githubusercontent.com/cwaazywabbit/ikariam-attacks-detector/master/dist/ikaraim-attacks-detector.user.js
+// @updateURL    https://github.com/cwaazywabbit/ikariam-attacks-detector/raw/master/ikariam-attacks-detector.user.js
+// @downloadURL  https://github.com/cwaazywabbit/ikariam-attacks-detector/raw/master/ikariam-attacks-detector.user.js
 // @resource     toastCss https://raw.githubusercontent.com/kamranahmedse/jquery-toast-plugin/master/dist/jquery.toast.min.css
 // @grant        unsafeWindow
 // @grant        GM_getResourceText
