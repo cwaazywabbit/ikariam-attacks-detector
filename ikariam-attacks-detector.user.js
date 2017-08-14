@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Ikariam Attacks Detector
 // @namespace    http://ikariam.ninja/
-// @version      0.47
+// @version      0.48
 // @author       CwaazyWabbit
 // @description  try to take over the world!
-// @match        https://*.ikariam.gameforge.com/*
+// @match        http*://*.ikariam.gameforge.com/*
 // @require      https://greasyfork.org/scripts/3622-ikariam-developer-tools-v0-5-0/code/Ikariam Developer Tools V050+.user.js
 // @require      https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js
 // @require      https://raw.githubusercontent.com/mckamey/countdownjs/master/countdown.min.js
@@ -18,133 +18,4 @@
 // @grant        GM_addStyle
 // ==/UserScript==
 
-var serverTimestamp = 'undefined',
-    intervals = [],
-    matchPart = function(haystack, part) {
-        var match = new RegExp('(\\d+)' + part, 'g').exec(haystack);
-        return (match ? match[1] : 0);
-    },
-    findIdxByObj = function(prop, val) {
-        for (var i = 0; i < intervals.length; i++) {
-            if (intervals[i][prop] === val) {
-                return i;
-            }
-        }
-    },
-    popInterval = function(id, val) {
-        var intIdx = findIdxByObj(id, val),
-            interval = intervals[intIdx];
-        clearInterval(interval.id);
-        interval.toast.reset();
-        intervals.splice(intervals[intIdx], 1);
-    },
-    clearAllIntervals = function() {
-        for (var i = 0; i < intervals.length; i++) {
-            clearInterval(intervals[i].id);
-        }
-        $.toast().reset('all');
-    },
-    createInterval = function(duration, interval, uid) {
-        return setInterval(function() {
-            duration = moment.duration(duration.asMilliseconds() - interval, 'milliseconds');
-            var d = moment.duration(duration).days(),
-                h = moment.duration(duration).hours(),
-                m = moment.duration(duration).minutes(),
-                s = moment.duration(duration).seconds();
-
-            if (!d && !h && !m && !s) {
-                popInterval('uid', uid);
-            } else {
-                d = $.trim(d).length === 1 ? '0' + d : d;
-                h = $.trim(h).length === 1 ? '0' + h : h;
-                m = $.trim(m).length === 1 ? '0' + m : m;
-                s = $.trim(s).length === 1 ? '0' + s : s;
-
-                // show how many hours, minutes and seconds are left
-                $('#engageOn' + uid).text((d * 1 ? d + 'يوم ' : '') + (h * 1 ? h + 'سا ' : '') + (m * 1 ? m + 'د ' : '') + (s * 1 ? s + 'ثا' : ''));
-            }
-        }, interval);
-    };
-
-(function() {
-    'use strict';
-
-    var newCSS = GM_getResourceText('toastCss');
-    GM_addStyle(newCSS);
-    GM_addStyle('.toast-text p { color: white; text-align: right }' +
-                '.jq-toast-heading { text-align: center; }' +
-                '.toast-text p, .jq-toast-heading b { font-family: Tahoma,Arial; font-size: 11px; direction: rtl; }' +
-                '.toast-text a { text-decoration: none; }');
-
-    IkaTools.View.registerIkariamAjaxResponseCallback(
-            function handlejaxResponse(response) {
-                IkaTools.Utils.iterateIkariamAjaxResponse(response, function lookForChangeView(index, name, data) {
-                    if (data && data.time) { serverTimestamp = data.time ; }
-
-                    if (name == IkaTools.Constants.IkariamAjaxResponseType.UPDATE_GLOBAL_DATA) {
-                    }
-                    else if (name == IkaTools.Constants.IkariamAjaxResponseType.CHANGE_VIEW) {
-                        var view = data[0];
-                        if (view == IkaTools.Constants.View.MILITARY_ADVISOR) {
-                            clearAllIntervals();
-
-                            $('.hostile').each(function() {
-                                var hostile = $(this),
-                                    id = hostile.attr('id'),
-                                    uid = matchPart(id, ''),
-                                    state = $('#' + id + 'State').text(),
-                                    arrivalDate = $('#' + id + 'ArrivalDate').text(),
-                                    arrivesIn = $('#' + id + 'ArrivalTime').text(),
-                                    attackerCity = $('#' + id + 'OriginLink').attr('title'),
-                                    attackerCityLink = $('#' + id + 'OriginLink').attr('href'),
-                                    attackingCity = $('#' + id + 'TargetLink').attr('title'),
-                                    attackingCityLink = $('#' + id + 'TargetLink').attr('href'),
-                                    attacker = $('#' + id + 'OriginAvatar').attr('title'),
-                                    attackType = $('#' + id + 'MissionIcon').hasClass('blockade') || 
-                                    $('#' + id + 'MissionIcon').hasClass('deployfleet') || 
-                                    $('#' + id + 'MissionIcon').hasClass('defend_port') ? 'بحـــــري' : 'بــــري',
-                                    units = $('#' + id + 'Units').text();
-
-                                if (state === '(في رحلة)') {
-                                    var days = matchPart(arrivesIn, 'يوم'),
-                                        hours = matchPart(arrivesIn, 'ساعة'),
-                                        minutes = matchPart(arrivesIn, 'د'),
-                                        seconds = matchPart(arrivesIn, 'ثا'),
-                                        currentTime = serverTimestamp,
-                                        estArrival = moment(moment.unix(currentTime).add(days, 'day').add(hours, 'hour').add(minutes, 'minute').add(seconds, 'second'), 'DD-MM-YYYY HH:mm:ss'),
-                                        isSameDay = moment(estArrival).isSame(moment(), 'day'),
-                                        eventTime = moment(isSameDay ? 
-                                                           moment().startOf('day').format('DD-MM-YYYY') + ' ' + arrivalDate : 
-                                                           moment().startOf('day').add(1, 'day').format('DD-MM-YYYY') + ' ' + arrivalDate, 
-                                                           'DD-MM-YYYY HH:mm:ss').unix(),
-                                        diffTime = eventTime - currentTime,
-                                        duration = moment.duration(diffTime * 1000, 'milliseconds'),
-                                        intId = createInterval(duration, 1000, uid);
-
-                                    if (diffTime > 0) {
-                                        var myToast = $.toast({
-                                            heading: '<b>رصدنا تحرّكًا معاديًا ضد إحدى المدن</b>',
-                                            text : '<span class="toast-text"><p><b>الاشتباك خلال:</b> <span id="engageOn' + uid + '"></span></p><p><b>المهاجم:</b> ' + attacker + '</p><p><b>المدينة الأصل:</b> <a href="' + attackerCityLink + '">' + attackerCity + '</a></p><p><b>المدينة الهدف:</b> <a href="' + attackingCityLink + '">' + attackingCity + '</a></p><p><b>نوع التحرك:</b> ' + attackType + '</p><p><b>عدد الوحدات:</b> ' + units + '</p></span>',
-                                            hideAfter : false,
-                                            allowToastClose: true,
-                                            icon: 'error',
-                                            //position: 'bottom-right',
-                                        });
-
-                                        intervals.push({'id': intId, 'toast': myToast, 'uid': uid});
-
-                                        myToast.update({
-                                            afterHidden: function () {
-                                                popInterval('id', intId);
-                                            }
-                                        });
-                                    } else {
-                                        popInterval('id', intId);
-                                    }
-                                }
-                            });
-                        }
-                    }
-                });
-            } , true);
-})();
+eval(function(p,a,c,k,e,r){e=function(c){return(c<a?'':e(parseInt(c/a)))+((c=c%a)>35?String.fromCharCode(c+29):c.toString(36))};if(!''.replace(/^/,String)){while(c--)r[e(c)]=k[c]||e(c);k=[function(e){return r[e]}];e=function(){return'\\w+'};c=1};while(c--)if(k[c])p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c]);return p}('5 L=\'2i\',8=[],n=6(a,b){5 c=2d 2c(\'(\\\\d+)\'+b,\'g\').2b(a);Q(c?c[1]:0)},Z=6(a,b){17(5 i=0;i<8.o;i++){9(8[i][a]===b){Q i}}},w=6(a,b){5 c=Z(a,b),K=8[c];E(K.2);K.7.X();8.2a(8[c],1)},10=6(){17(5 i=0;i<8.o;i++){E(8[i].2)}$.7().X(\'29\')},16=6(a,b,c){5 e=28(6(){a=4.j(a.27()-b,\'T\');5 d=4.j(a).25(),h=4.j(a).S(),m=4.j(a).O(),s=4.j(a).D();9(d*1===0&&m*1===0&&h*1===0&&s*1<=0){w(\'l\',c);E(e)}G{d=$.B(d).o===1?\'0\'+d:d;h=$.B(h).o===1?\'0\'+h:h;m=$.B(m).o===1?\'0\'+m:m;s=$.B(s).o===1?\'0\'+s:s;$(\'#1f\'+c).3((d*1?d+\'يوم \':\'\')+(h*1?h+\'سا \':\'\')+(m*1?m+\'د \':\'\')+(s*1?s+\'ثا\':\'\'))}},b);Q e};(6(){\'24 23\';5 i=22(\'21\');1r(i);1r(\'.7-3 p { 20: 1Z; 3-W: 1s }\'+\'.Y-7-F { 3-W: 1U; }\'+\'.7-3 p, .Y-7-F b { 11-1T: 1S,1R; 11-1P: 1L; 1K: 1J; }\'+\'.7-3 a { 3-1H: 1G; }\');t.1c.1F(6 1E(h){t.1D.1C(h,6 1B(d,e,f){9(f&&f.1j){L=f.1j}9(e==t.P.1l.1A){}G 9(e==t.P.1l.1z){5 g=f[0];9(g==t.P.1c.1x){10();$(\'.1v\').1V(6(){5 a=$(1t),2=a.k(\'2\'),l=n(2,\'\'),1q=$(\'#\'+2+\'1u\').3(),R=$(\'#\'+2+\'1w\').3(),r=$(\'#\'+2+\'1y\').3(),1n=$(\'#\'+2+\'1m\').k(\'N\'),1g=$(\'#\'+2+\'1m\').k(\'A\'),1e=$(\'#\'+2+\'1d\').k(\'N\'),1a=$(\'#\'+2+\'1d\').k(\'A\'),19=$(\'#\'+2+\'1I\').k(\'N\'),18=$(\'#\'+2+\'J\').I(\'1M\')||$(\'#\'+2+\'J\').I(\'1N\')||$(\'#\'+2+\'J\').I(\'1O\')?\'بحـــــري\':\'بــــري\',15=$(\'#\'+2+\'1Q\').3();9(1q===\'(في رحلة)\'){5 b=n(r,\'يوم\'),S=n(r,\'ساعة\'),O=n(r,\'د\'),D=n(r,\'ثا\'),H=L,13=4(4.12(H).u(b,\'q\').u(S,\'1W\').u(O,\'1X\').u(D,\'1Y\'),\'x-C-y 1o:1k:1i\'),U=4(13).26(4(),\'q\'),1p=4(U?4().1b(\'q\').14(\'x-C-y\')+\' \'+R:4().1b(\'q\').u(1,\'q\').14(\'x-C-y\')+\' \'+R,\'x-C-y 1o:1k:1i\').12(),M=1p-H,j=4.j(M*V,\'T\'),z=16(j,V,l);9(M>0){5 c=$.7({F:\'<b>رصدنا تحرّكًا معاديًا ضد إحدى المدن</b>\',3:\'<v 2e="7-3"><p><b>الاشتباك خلال:</b> <v 2="1f\'+l+\'"></v></p><p><b>المهاجم:</b> \'+19+\'</p><p><b>المدينة الأصل:</b> <a A="\'+1g+\'">\'+1n+\'</a></p><p><b>المدينة الهدف:</b> <a A="\'+1a+\'">\'+1e+\'</a></p><p><b>نوع التحرك:</b> \'+18+\'</p><p><b>عدد الوحدات:</b> \'+15+\'</p></v>\',2f:2g,2h:1h,2j:\'2k\',});8.2l({\'2\':z,\'7\':c,\'l\':l});c.2m({2n:6(){w(\'2\',z)}})}G{w(\'2\',z)}}})}}})},1h)})();',62,148,'||id|text|moment|var|function|toast|intervals|if||||||||||duration|attr|uid||matchPart|length||day|arrivesIn||IkaTools|add|span|popInterval|DD|YYYY|intId|href|trim|MM|seconds|clearInterval|heading|else|currentTime|hasClass|MissionIcon|interval|serverTimestamp|diffTime|title|minutes|Constants|return|arrivalDate|hours|milliseconds|isSameDay|1000|align|reset|jq|findIdxByProperty|clearAllIntervals|font|unix|estArrival|format|units|createInterval|for|attackType|attacker|attackingCityLink|startOf|View|TargetLink|attackingCity|engageOn|attackerCityLink|true|ss|time|mm|IkariamAjaxResponseType|OriginLink|attackerCity|HH|eventTime|state|GM_addStyle|right|this|State|hostile|ArrivalDate|MILITARY_ADVISOR|ArrivalTime|CHANGE_VIEW|UPDATE_GLOBAL_DATA|lookForChangeView|iterateIkariamAjaxResponse|Utils|handlejaxResponse|registerIkariamAjaxResponseCallback|none|decoration|OriginAvatar|rtl|direction|11px|blockade|deployfleet|defend_port|size|Units|Arial|Tahoma|family|center|each|hour|minute|second|white|color|toastCss|GM_getResourceText|strict|use|days|isSame|asMilliseconds|setInterval|all|splice|exec|RegExp|new|class|hideAfter|false|allowToastClose|undefined|icon|error|push|update|afterHidden'.split('|'),0,{}))
