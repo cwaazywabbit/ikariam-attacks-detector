@@ -54,7 +54,7 @@
 // @exclude      http*://board.ikariam.gameforge.com/*
 // ==/UserScript==
 
-if (typeof IkaTools == 'undefined') {
+if (typeof IkaTools == 'undefined' && new Regexp('^s\\d+-[a-z]+\\.ikariam\\.gameforge\\.com', 'g').exec(document.domain)) {
 IkaTools = (function() {
   var ikaToolsVersion = 0;
   
