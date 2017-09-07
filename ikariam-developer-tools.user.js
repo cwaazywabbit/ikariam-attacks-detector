@@ -52,8 +52,9 @@
 // @require         http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js
 // ==/UserScript==
 
-console.log( new RegExp('^s\\d+-[a-z]+\\.ikariam\\.gameforge\\.com', 'g').exec(document.domain));
-if (typeof IkaTools == 'undefined' && new RegExp('^s\\d+-[a-z]+\\.ikariam\\.gameforge\\.com', 'g').exec(document.domain)) {
+var x = new RegExp('^s\\d+-[a-z]+\\.ikariam\\.gameforge\\.com', 'g').exec(document.domain);
+console.log(x);
+if (typeof IkaTools == 'undefined' && x) {
 IkaTools = (function() {
   var ikaToolsVersion = 0;
   
