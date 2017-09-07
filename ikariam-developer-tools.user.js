@@ -50,6 +50,9 @@
 // @history         0.11 Small tweak to work with TamperMonkey in Google Chrome.
 // @history         0.10 Initial version.
 // @require         http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js
+// @include      http*://s*-*.ikariam.gameforge.com/*
+// @include      http*://*.ikariam.gameforge.com/*
+// @exclude      http*://board.ikariam.gameforge.com/*
 // ==/UserScript==
 
 if (typeof IkaTools == 'undefined') {
