@@ -6,7 +6,6 @@
 // @description  try to take over the world!
 // @include      http*://s*-*.ikariam.gameforge.com/*
 // @exclude      http*://board.ikariam.gameforge.com/*
-// @include      http*://*.ikariam.gameforge.com/*
 // @require      https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js
 // @require      https://raw.githubusercontent.com/mckamey/countdownjs/master/countdown.min.js
 // @require      https://raw.githubusercontent.com/icambron/moment-countdown/master/dist/moment-countdown.min.js
@@ -15,6 +14,7 @@
 // @updateURL    https://github.com/cwaazywabbit/ikariam-attacks-detector/raw/master/ikariam-attacks-detector.user.js
 // @downloadURL  https://github.com/cwaazywabbit/ikariam-attacks-detector/raw/master/ikariam-attacks-detector.user.js
 // @resource     toastCss https://raw.githubusercontent.com/kamranahmedse/jquery-toast-plugin/master/dist/jquery.toast.min.css
+// @include      http*://*.ikariam.gameforge.com/*
 // @grant        unsafeWindow
 // @grant        GM_getResourceText
 // @grant        GM_addStyle
